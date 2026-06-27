@@ -9,15 +9,26 @@ import FichesGrid from '../components/FichesGrid'
 import PublishBar from '../components/PublishBar'
 import HistoriqueList from '../components/HistoriqueList'
 import ContactForm from '../components/ContactForm'
+import PlanificationCalendar from '../components/PlanificationCalendar'
 import { useMenu } from '../hooks/useMenu'
+import { usePlanification } from '../hooks/usePlanification'
 
 export default function Admin() {
-  // 'semaine' | 'historique' | 'contact'
+  // 'semaine' | 'planification' | 'historique' | 'contact'
   const [onglet, setOnglet] = useState('semaine')
   const [texte, setTexte]   = useState('')
 
   const { menu, analyse, publication, confirmation, erreur, analyser, publier, majMenu, reset } =
     useMenu()
+
+  const {
+    planifications,
+    chargement: planLoading,
+    erreur: planErreur,
+    chargerPlanifications,
+    supprimerPlanification,
+    dupliquerVersAutreSemaine,
+  } = usePlanification()
 
   function handleNouveau() {
     reset()
@@ -68,6 +79,13 @@ export default function Admin() {
               )}
 
             </div>
+          ) : onglet === 'planification' ? (
+            <PlanificationCalendar
+              planifications={planifications}
+              onCharger={chargerPlanifications}
+              onDupliquer={dupliquerVersAutreSemaine}
+              onSupprimer={supprimerPlanification}
+            />
           ) : onglet === 'historique' ? (
             <HistoriqueList onRepublier={publier} />
           ) : (
