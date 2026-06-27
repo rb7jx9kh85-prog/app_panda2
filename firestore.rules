@@ -29,6 +29,12 @@ service cloud.firestore {
       match /menus/{menuId} {
         allow read, write: if request.auth != null;
       }
+
+      // Menus planifiés (brouillons pour planification à l'avance) :
+      // lecture et écriture : authentifiés uniquement
+      match /menus_planifies/{planId} {
+        allow read, write: if request.auth != null;
+      }
     }
   }
 }
