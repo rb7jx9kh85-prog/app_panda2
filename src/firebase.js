@@ -2,7 +2,11 @@
 // Initialisation Firebase (Auth email/password + Firestore)
 // ─────────────────────────────────────────────────────────────
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import {
+  browserLocalPersistence,
+  getAuth,
+  setPersistence,
+} from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 // Configuration Firebase du projet "le-panda".
@@ -36,6 +40,19 @@ const app = initializeApp(firebaseConfig)
 
 export const auth = getAuth(app)
 export const db = getFirestore(app)
+
+// Persistance LOCALE de la session : le gérant reste connecté même après
+// avoir fermé l'onglet ou le navigateur (le jeton est conservé dans le
+// stockage local de l'appareil, et rafraîchi automatiquement par Firebase).
+// Plus besoin de se reconnecter à chaque visite.
+//
+// Note : il n'est pas possible de « lier » la session à une adresse IP —
+// l'authentification Firebase repose sur un jeton stocké côté appareil, pas
+// sur l'IP. La persistance locale est l'équivalent fonctionnel attendu.
+setPersistence(auth, browserLocalPersistence).catch(() => {
+  // Si le stockage local est indisponible (navigation privée stricte), on
+  // retombe silencieusement sur la persistance par défaut.
+})
 
 // Identifiant fixe du restaurant (collection restaurants/{id})
 export const RESTAURANT_ID =

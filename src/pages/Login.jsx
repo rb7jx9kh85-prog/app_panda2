@@ -3,17 +3,41 @@
 // ─────────────────────────────────────────────────────────────
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
+// Traduit le code d'erreur Firebase en message clair pour le gérant.
+// IMPORTANT : on distingue le blocage temporaire (« trop de tentatives »)
+// du vrai mauvais mot de passe — sinon le gérant croit à tort que son mot de
+// passe est faux alors qu'il est simplement bloqué.
+function traduireErreur(code) {
+  switch (code) {
+    case 'auth/too-many-requests':
+      return 'Trop de tentatives : Firebase a temporairement bloqué l’accès par sécurité. Cliquez sur « Mot de passe oublié ? » pour débloquer tout de suite, ou patientez ~15 min (déblocage automatique).'
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+    case 'auth/user-not-found':
+    case 'auth/invalid-email':
+      return 'Identifiants incorrects. Réessayez.'
+    case 'auth/network-request-failed':
+      return 'Problème de connexion internet. Vérifiez votre réseau.'
+    case 'auth/user-disabled':
+      return 'Ce compte a été désactivé.'
+    default:
+      return 'Connexion impossible. Réessayez dans un instant.'
+  }
+}
+
 export default function Login() {
-  const { user, chargement, seConnecter } = useAuth()
+  const { user, chargement, seConnecter, reinitialiserMotDePasse } = useAuth()
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
   const [erreur, setErreur] = useState('')
+  const [info, setInfo] = useState('') // message de succès (e-mail de reset)
   const [enCours, setEnCours] = useState(false)
+  const [resetEnCours, setResetEnCours] = useState(false)
 
   // Si déjà connecté au chargement → redirection directe vers /admin
   useEffect(() => {
@@ -23,6 +47,7 @@ export default function Login() {
   async function handleConnexion() {
     if (enCours) return
     setErreur('')
+    setInfo('')
     if (!email || !motDePasse) {
       setErreur('Veuillez renseigner votre e-mail et votre mot de passe.')
       return
@@ -31,10 +56,32 @@ export default function Login() {
     try {
       await seConnecter(email.trim(), motDePasse)
       navigate('/admin', { replace: true })
-    } catch (_) {
-      setErreur('Identifiants incorrects. Réessayez.')
+    } catch (e) {
+      setErreur(traduireErreur(e?.code))
     } finally {
       setEnCours(false)
+    }
+  }
+
+  // Envoi de l'e-mail de réinitialisation (débloque aussi « trop de tentatives »)
+  async function handleResetMotDePasse() {
+    if (resetEnCours) return
+    setErreur('')
+    setInfo('')
+    if (!email) {
+      setErreur('Saisissez d’abord votre adresse e-mail, puis cliquez à nouveau.')
+      return
+    }
+    setResetEnCours(true)
+    try {
+      await reinitialiserMotDePasse(email.trim())
+      setInfo(
+        `E-mail de réinitialisation envoyé à ${email.trim()}. Vérifiez votre boîte (et les spams).`
+      )
+    } catch (e) {
+      setErreur(traduireErreur(e?.code))
+    } finally {
+      setResetEnCours(false)
     }
   }
 
@@ -131,11 +178,33 @@ export default function Login() {
           )}
         </button>
 
+        {/* Lien de réinitialisation / déblocage */}
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={handleResetMotDePasse}
+            disabled={resetEnCours}
+            className="text-xs underline-offset-2 transition-colors duration-300 hover:underline disabled:opacity-50"
+            style={{ color: 'var(--muted)' }}
+          >
+            {resetEnCours ? 'Envoi…' : 'Mot de passe oublié ?'}
+          </button>
+        </div>
+
         {erreur && (
           <div className="mt-4 flex justify-center">
             <span className="badge-erreur">
               <AlertCircle size={14} />
               {erreur}
+            </span>
+          </div>
+        )}
+
+        {info && (
+          <div className="mt-4 flex justify-center">
+            <span className="badge-succes text-center">
+              <CheckCircle2 size={14} />
+              {info}
             </span>
           </div>
         )}

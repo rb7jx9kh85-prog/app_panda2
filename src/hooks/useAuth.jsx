@@ -4,6 +4,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import {
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut as fbSignOut,
 } from 'firebase/auth'
@@ -31,7 +32,19 @@ export function AuthProvider({ children }) {
   // Déconnexion
   const seDeconnecter = () => fbSignOut(auth)
 
-  const valeur = { user, chargement, seConnecter, seDeconnecter }
+  // Envoi d'un e-mail de réinitialisation du mot de passe.
+  // Bonus : réinitialiser le mot de passe lève aussi le blocage temporaire
+  // « trop de tentatives » imposé par Firebase.
+  const reinitialiserMotDePasse = (email) =>
+    sendPasswordResetEmail(auth, email)
+
+  const valeur = {
+    user,
+    chargement,
+    seConnecter,
+    seDeconnecter,
+    reinitialiserMotDePasse,
+  }
 
   return <AuthContext.Provider value={valeur}>{children}</AuthContext.Provider>
 }
