@@ -1,13 +1,14 @@
 // ─────────────────────────────────────────────────────────────
 // Sidebar — navigation (desktop/tablet) + bottom tab bar (mobile)
 // ─────────────────────────────────────────────────────────────
-import { CalendarDays, ClipboardList, LogOut } from 'lucide-react'
+import { CalendarDays, ClipboardList, Mail, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 const NAV = [
   { id: 'semaine', label: 'Menu semaine', Icone: CalendarDays },
   { id: 'historique', label: 'Historique', Icone: ClipboardList },
+  { id: 'contact', label: 'Demandes', Icone: Mail },
 ]
 
 export default function Sidebar({ ongletActif, setOngletActif }) {

@@ -8,9 +8,11 @@ import MenuInput from '../components/MenuInput'
 import FichesGrid from '../components/FichesGrid'
 import PublishBar from '../components/PublishBar'
 import HistoriqueList from '../components/HistoriqueList'
+import ContactForm from '../components/ContactForm'
 import { useMenu } from '../hooks/useMenu'
 
 export default function Admin() {
+  // 'semaine' | 'historique' | 'contact'
   const [onglet, setOnglet] = useState('semaine')
   const [texte, setTexte]   = useState('')
 
@@ -66,8 +68,10 @@ export default function Admin() {
               )}
 
             </div>
-          ) : (
+          ) : onglet === 'historique' ? (
             <HistoriqueList onRepublier={publier} />
+          ) : (
+            <ContactForm />
           )}
 
         </div>
