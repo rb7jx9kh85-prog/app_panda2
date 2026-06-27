@@ -2,19 +2,29 @@
 // Service OpenAI — parsing du menu Facebook brut en JSON structure
 // ─────────────────────────────────────────────────────────────
 //
-// SECURITE — Cle API exposee cote client
+// ⚠️  SECURITE — Cle API exposee cote client
 // La cle OpenAI est lue depuis `VITE_OPENAI_API_KEY`. Le prefixe `VITE_`
 // signifie qu'elle est integree au bundle JavaScript et donc VISIBLE par
 // quiconque inspecte le code livre au navigateur.
 //
-// C'est un compromis ACCEPTE pour cette application interne : l'acces au
-// panneau d'administration est protege par le login Firebase (un seul
-// gerant), l'app n'est jamais publique, et l'usage de l'API reste marginal.
-// `dangerouslyAllowBrowser: true` est requis par le SDK pour autoriser
-// explicitement cet usage navigateur.
+// RISQUES:
+// 1. N'importe qui peut extraire la cle et faire des appels non-autorises
+// 2. Factures OpenAI potentiellement illimitees (DoS financier)
+// 3. Limite de rate limit peut etre contournee
 //
-// Pour une mise en production grand public, deplacer cet appel derriere
-// une Cloud Function / route serverless qui garde la cle secrete.
+// MITIGATIONS ACTUELLES:
+// - App Firebase-protected: un seul gerant authentifie peut acceder
+// - Limites de taille d'input enforces (MAX_TEXT_LENGTH = 5000 chars)
+// - Usage suppose etre marginal et interne
+//
+// POUR PRODUCTION GRAND PUBLIC:
+// Migrer vers une Cloud Function / route serverless (ex: Firebase Cloud Functions,
+// Vercel Serverless Function) qui garde la cle secrete et ajoute:
+// - Rate limiting par utilisateur (max X appels/jour)
+// - Quotas de tokens par utilisateur
+// - Logging et monitoring des appels
+// - Validation serveur-side des inputs
+// - Timeout strict et gestion des erreurs robuste
 // ─────────────────────────────────────────────────────────────
 import OpenAI from 'openai'
 
@@ -136,9 +146,24 @@ function nettoyerTexte(texte) {
   return t
 }
 
+// ⚠️  LIMITES DE SECURITE: protegent contre les abus grossiers
+// mais une migration backend est ideale (voir src/BACKEND_SETUP.md)
+const MAX_TEXT_LENGTH = 5000
+const MIN_TEXT_LENGTH = 10
+
 export async function parseMenuWithAI(texte) {
   if (!texte || !texte.trim()) {
     throw new Error('Veuillez coller le texte de votre menu avant l analyse.')
+  }
+
+  const cleaned = texte.trim()
+
+  if (cleaned.length < MIN_TEXT_LENGTH) {
+    throw new Error('Le texte est trop court. Minimum 10 caracteres.')
+  }
+
+  if (cleaned.length > MAX_TEXT_LENGTH) {
+    throw new Error('Le texte est trop long. Maximum 5000 caracteres. Decoupez votre menu en plusieurs parties.')
   }
 
   try {

@@ -1,31 +1,75 @@
 // ─────────────────────────────────────────────────────────────
 // ContactForm — demande de modification du site vitrine via Web3Forms
 // ─────────────────────────────────────────────────────────────
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Send, CheckCircle2, AlertCircle } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
 
 // Clé d'accès Web3Forms — à configurer dans les variables d'environnement Vercel
+// ⚠️  SECURITE: Idealement, cette cle devrait etre sur un backend serverless
+// voir src/BACKEND_SETUP.md pour instructions de migration
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY || ''
+const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL || 'noevouillamoz3@gmail.com'
+
+// Rate limiting côté client: max 1 soumission par 30 secondes par utilisateur
+const RATE_LIMIT_MS = 30000
+const STORAGE_KEY = 'lepanda_contact_last_submit'
 
 export default function ContactForm() {
+  const { user } = useAuth()
   const [sujet, setSujet] = useState('')
   const [message, setMessage] = useState('')
   const [enCours, setEnCours] = useState(false)
   const [succes, setSucces] = useState(false)
   const [erreur, setErreur] = useState('')
+  const [rateLimitErreur, setRateLimitErreur] = useState('')
+  const monteRef = useRef(true)
+
+  useEffect(() => {
+    return () => {
+      monteRef.current = false
+    }
+  }, [])
+
+  // Verifier le rate limiting
+  function verifierRateLimit() {
+    const lastSubmit = localStorage.getItem(STORAGE_KEY)
+    if (!lastSubmit) return true
+
+    const elapsed = Date.now() - parseInt(lastSubmit, 10)
+    if (elapsed < RATE_LIMIT_MS) {
+      const secondesRestantes = Math.ceil((RATE_LIMIT_MS - elapsed) / 1000)
+      return { ok: false, message: `Attendez ${secondesRestantes}s avant de renvoyer une demande.` }
+    }
+    return true
+  }
 
   async function handleEnvoyer() {
     if (enCours) return
     setErreur('')
     setSucces(false)
+    setRateLimitErreur('')
+
+    // Verifier authentification
+    if (!user) {
+      setErreur('Vous devez etre connecte pour soumettre une demande.')
+      return
+    }
 
     if (!sujet.trim() || !message.trim()) {
       setErreur('Veuillez remplir le sujet et le message.')
       return
     }
 
+    // Verifier rate limiting
+    const rateLimitCheck = verifierRateLimit()
+    if (rateLimitCheck !== true) {
+      setRateLimitErreur(rateLimitCheck.message)
+      return
+    }
+
     if (!WEB3FORMS_KEY) {
-      setErreur('Service de formulaire non configuré. Veuillez contacter le support.')
+      setErreur('Service de formulaire non configure. Veuillez contacter le support.')
       return
     }
 
@@ -37,30 +81,36 @@ export default function ContactForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           access_key: WEB3FORMS_KEY,
-          from_name: 'Le Panda Admin',
+          from_name: `Le Panda Admin (${user.email})`,
           from_email: 'noreply@lepanda.local',
-          to_email: 'noevouillamoz3@gmail.com',
+          to_email: CONTACT_EMAIL,
           subject: `[Le Panda] Demande de modification : ${sujet}`,
-          message: message,
+          message: `Demande de: ${user.email}\n\n${message}`,
           redirect: 'https://lepanda-admin.vercel.app/',
         }),
       })
 
       const data = await response.json()
 
-      if (data.success) {
+      if (data.success && monteRef.current) {
         setSucces(true)
         setSujet('')
         setMessage('')
-        // Masquer le message de succès après 4s
-        setTimeout(() => setSucces(false), 4000)
-      } else {
-        setErreur('Erreur lors de l\'envoi. Réessayez.')
+        localStorage.setItem(STORAGE_KEY, String(Date.now()))
+        setTimeout(() => {
+          if (monteRef.current) setSucces(false)
+        }, 4000)
+      } else if (monteRef.current) {
+        setErreur('Erreur lors de l\'envoi. Reessayez.')
       }
     } catch (_) {
-      setErreur('Problème de connexion. Réessayez.')
+      if (monteRef.current) {
+        setErreur('Probleme de connexion. Reessayez.')
+      }
     } finally {
-      setEnCours(false)
+      if (monteRef.current) {
+        setEnCours(false)
+      }
     }
   }
 
@@ -74,8 +124,25 @@ export default function ContactForm() {
       <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>
         Envoyez vos demandes pour le site vitrine (lepanda.vercel.app)
       </p>
+      {!user && (
+        <div className="mt-4 flex justify-center">
+          <span className="badge-erreur">
+            <AlertCircle size={14} />
+            Vous devez etre connecte pour soumettre une demande.
+          </span>
+        </div>
+      )}
 
       <div className="mt-6 space-y-4">
+        {rateLimitErreur && (
+          <div className="flex justify-center">
+            <span className="badge-erreur">
+              <AlertCircle size={14} />
+              {rateLimitErreur}
+            </span>
+          </div>
+        )}
+
         <div>
           <label className="field-label" htmlFor="sujet">
             Sujet
@@ -87,7 +154,7 @@ export default function ContactForm() {
             placeholder="ex. Ajouter horaires d\'ouverture, changer couleur du logo..."
             value={sujet}
             onChange={(e) => setSujet(e.target.value)}
-            disabled={enCours}
+            disabled={enCours || !user}
           />
         </div>
 
@@ -102,14 +169,14 @@ export default function ContactForm() {
             placeholder="Décrivez précisément ce que vous souhaitez modifier ou ajouter..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            disabled={enCours}
+            disabled={enCours || !user}
           />
         </div>
 
         <button
           type="button"
           onClick={handleEnvoyer}
-          disabled={enCours || !sujet.trim() || !message.trim()}
+          disabled={enCours || !sujet.trim() || !message.trim() || !user}
           className="btn-primary w-full"
         >
           {enCours ? (
