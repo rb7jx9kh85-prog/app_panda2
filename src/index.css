@@ -173,3 +173,35 @@
 /* Spinner */
 @keyframes spin { to { transform: rotate(360deg); } }
 .animate-spin-slow { animation: spin 0.85s linear infinite; }
+
+/* ─────────────────────────────────────────────────────────────
+   Animations légères — entrées discrètes, pas trop chargées
+   ───────────────────────────────────────────────────────────── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim-entree {
+  animation: fade-in-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.anim-fade { animation: fade-in 0.3s ease both; }
+
+/* Carte semaine de planification : hover doux + transition fluide */
+.carte-semaine {
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+.carte-semaine:hover {
+  transform: translateY(-2px);
+  border-color: rgba(212, 175, 87, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Respecte les préférences d'accessibilité (réduction des animations) */
+@media (prefers-reduced-motion: reduce) {
+  .anim-entree, .anim-fade, .carte-semaine { animation: none; transition: none; }
+}

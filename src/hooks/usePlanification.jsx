@@ -9,19 +9,26 @@ export function usePlanification() {
   const [chargement, setChargement] = useState(false)
   const [erreur, setErreur] = useState('')
 
-  const creerPlanification = useCallback(async (semaine, menus) => {
+  const creerPlanification = useCallback(async (semaine, options = {}) => {
     try {
       setErreur('')
+      const { menus = [], notes = '' } = options
       const id = `${RESTAURANT_ID}_${semaine}_${Date.now()}`
       const docRef = doc(db, `restaurants/${RESTAURANT_ID}/menus_planifies`, id)
 
-      await setDoc(docRef, {
+      const planif = {
         semaine,
-        menus: menus || [],
+        menus,
+        notes,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         status: 'brouillon',
-      })
+      }
+
+      await setDoc(docRef, planif)
+
+      // Mise a jour optimiste de l'etat local (pas besoin de recharger)
+      setPlanifications(prev => [...prev, { id, ...planif }])
 
       return id
     } catch (err) {

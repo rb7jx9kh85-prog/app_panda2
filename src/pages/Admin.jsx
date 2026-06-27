@@ -23,9 +23,9 @@ export default function Admin() {
 
   const {
     planifications,
-    chargement: planLoading,
-    erreur: planErreur,
     chargerPlanifications,
+    creerPlanification,
+    mettreAJourPlanification,
     supprimerPlanification,
     dupliquerVersAutreSemaine,
   } = usePlanification()
@@ -40,7 +40,7 @@ export default function Admin() {
       <Sidebar ongletActif={onglet} setOngletActif={setOnglet} />
 
       <main className="md:ml-[240px]">
-        <div className="mx-auto max-w-5xl px-4 py-8 pb-28 md:px-8 md:pb-12">
+        <div key={onglet} className="anim-fade mx-auto max-w-5xl px-4 py-8 pb-28 md:px-8 md:pb-12">
 
           {onglet === 'semaine' ? (
             <div className="flex flex-col gap-8">
@@ -83,6 +83,8 @@ export default function Admin() {
             <PlanificationCalendar
               planifications={planifications}
               onCharger={chargerPlanifications}
+              onCreer={creerPlanification}
+              onModifier={mettreAJourPlanification}
               onDupliquer={dupliquerVersAutreSemaine}
               onSupprimer={supprimerPlanification}
             />
