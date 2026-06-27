@@ -1,53 +1,39 @@
 // ─────────────────────────────────────────────────────────────
-// FicheCard — une fiche plat avec édition inline (Lucide Edit3)
+// FicheCard — une fiche plat avec édition inline
+// Hover géré via la classe CSS .fiche-card (pas de JS onMouseEnter)
 // ─────────────────────────────────────────────────────────────
 import { useState } from 'react'
 import { Check, Edit3 } from 'lucide-react'
 
-// Libellés affichés selon le type renvoyé par l'IA
 const LIBELLE_TYPE = {
-  entree: 'Entrée',
+  entree:        'Entrée',
   plat_principal: 'Plat principal',
-  dessert: 'Dessert',
-  info: 'Info',
+  dessert:       'Dessert',
+  info:          'Info',
 }
 
 export default function FicheCard({ fiche, onChange }) {
   const [edition, setEdition] = useState(false)
 
-  // Met à jour un champ de la fiche et remonte au parent
   function maj(champ, valeur) {
     onChange({ ...fiche, [champ]: valeur })
   }
 
-  const libelle = LIBELLE_TYPE[fiche.type] || fiche.type
-
   return (
-    <article
-      className="group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-300"
-      style={{
-        background: 'var(--sombre)',
-        border: '1px solid var(--border)',
-      }}
-      onMouseEnter={(e) =>
-        (e.currentTarget.style.borderColor = 'rgba(212,175,87,0.3)')
-      }
-      onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
-    >
-      {/* Ligne rouge décorative en haut */}
+    <article className="fiche-card flex flex-col">
       <div className="ligne-deco" />
 
       <div className="flex flex-1 flex-col p-5">
-        {/* Entête : badge type (gauche) + jour (droite) */}
+        {/* Entête */}
         <div className="mb-3 flex items-start justify-between gap-2">
           <span
             className="text-[0.65rem] font-semibold uppercase tracking-widest"
             style={{ color: 'var(--rouge)' }}
           >
-            {fiche.emoji} {libelle}
+            {fiche.emoji} {LIBELLE_TYPE[fiche.type] ?? fiche.type}
           </span>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             {edition ? (
               <input
                 value={fiche.jour}
@@ -59,12 +45,14 @@ export default function FicheCard({ fiche, onChange }) {
               fiche.jour && <span className="pill-jour">{fiche.jour}</span>
             )}
 
-            {/* Bouton édition / validation */}
             <button
               type="button"
               onClick={() => setEdition((v) => !v)}
-              className="rounded-md p-1 transition-colors duration-300"
-              style={{ color: edition ? 'var(--or)' : 'var(--muted)' }}
+              className="rounded-md p-1"
+              style={{
+                color: edition ? 'var(--or)' : 'var(--muted)',
+                transition: 'color 0.2s ease',
+              }}
               title={edition ? 'Terminer' : 'Modifier'}
             >
               {edition ? <Check size={16} /> : <Edit3 size={15} />}
@@ -72,7 +60,7 @@ export default function FicheCard({ fiche, onChange }) {
           </div>
         </div>
 
-        {/* Nom du plat */}
+        {/* Nom */}
         {edition ? (
           <input
             value={fiche.nom}
@@ -89,7 +77,7 @@ export default function FicheCard({ fiche, onChange }) {
           </h3>
         )}
 
-        {/* Description IA */}
+        {/* Description */}
         {edition ? (
           <textarea
             value={fiche.description}
@@ -99,23 +87,19 @@ export default function FicheCard({ fiche, onChange }) {
             placeholder="Description"
           />
         ) : (
-          <p
-            className="mt-1 text-sm leading-relaxed"
-            style={{ color: 'var(--muted)' }}
-          >
+          <p className="mt-1 flex-1 text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
             {fiche.description}
           </p>
         )}
 
-        {/* Prix (si présent) */}
+        {/* Prix */}
         {edition ? (
           <div className="mt-3 flex items-center gap-2">
-            <span className="text-xs" style={{ color: 'var(--muted)' }}>
-              Prix CHF
-            </span>
+            <span className="text-xs" style={{ color: 'var(--muted)' }}>Prix CHF</span>
             <input
               type="number"
               step="0.5"
+              min="0"
               value={fiche.prix ?? ''}
               onChange={(e) =>
                 maj('prix', e.target.value === '' ? null : Number(e.target.value))
@@ -127,10 +111,7 @@ export default function FicheCard({ fiche, onChange }) {
           </div>
         ) : (
           fiche.prix != null && (
-            <p
-              className="mt-3 font-cormorant"
-              style={{ fontSize: '1.1rem', color: 'var(--or)' }}
-            >
+            <p className="mt-3 font-cormorant" style={{ fontSize: '1.1rem', color: 'var(--or)' }}>
               CHF {Number(fiche.prix).toFixed(2)}
             </p>
           )

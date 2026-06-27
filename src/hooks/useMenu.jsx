@@ -1,76 +1,69 @@
 // ─────────────────────────────────────────────────────────────
 // useMenu — orchestration analyse IA + publication Firestore
+// Séparation stricte : ce hook gère UNIQUEMENT l'état React.
+// Les appels réseau restent dans leurs services respectifs.
 // ─────────────────────────────────────────────────────────────
 import { useState } from 'react'
 import { parseMenuWithAI } from '../services/openai'
-import { publishMenu, getMenuHistory } from '../services/firestore'
+import { publishMenu } from '../services/firestore'
 import { useAuth } from './useAuth'
+
+const ETAT_INITIAL = {
+  menu: null,
+  analyse: false,
+  publication: false,
+  confirmation: null,
+  erreur: null,
+}
 
 export function useMenu() {
   const { user } = useAuth()
+  const [etat, setEtat] = useState(ETAT_INITIAL)
 
-  const [analyse, setAnalyse] = useState(false) // chargement analyse IA
-  const [erreur, setErreur] = useState(null)
-  const [menu, setMenu] = useState(null) // résultat IA éditable
-  const [publication, setPublication] = useState(false) // chargement publish
-  const [confirmation, setConfirmation] = useState(null) // { id, publie_le }
+  function setPartiel(partiel) {
+    setEtat((prev) => ({ ...prev, ...partiel }))
+  }
 
-  /** Lance l'analyse OpenAI du texte brut. */
   async function analyser(texte) {
-    setErreur(null)
-    setConfirmation(null)
-    setAnalyse(true)
+    setEtat({ ...ETAT_INITIAL, analyse: true })
     try {
-      const resultat = await parseMenuWithAI(texte)
-      setMenu(resultat)
-      return resultat
+      const menu = await parseMenuWithAI(texte)
+      setPartiel({ menu, analyse: false })
     } catch (e) {
-      setErreur(e.message)
-      return null
-    } finally {
-      setAnalyse(false)
+      setPartiel({ erreur: e.message, analyse: false })
     }
   }
 
-  /** Publie le menu courant (ou un menu fourni) sur Firestore. */
-  async function publier(menuAPublier = menu, docId) {
+  async function publier(menuAPublier = etat.menu, docId) {
     if (!menuAPublier) return
-    setErreur(null)
-    setPublication(true)
+    setPartiel({ publication: true, erreur: null })
     try {
       const res = await publishMenu(menuAPublier, user?.email, docId)
-      // La confirmation apparaît ~2s après la publication (cf. specs Bloc 3)
+      // Délai de 2s avant d'afficher la confirmation (UX — laisser le temps
+      // à Firestore de propager vers le site vitrine)
       await new Promise((r) => setTimeout(r, 2000))
-      setConfirmation(res)
-      return res
-    } catch (e) {
-      setErreur('Échec de la publication. Vérifie ta connexion et réessaie.')
-      return null
-    } finally {
-      setPublication(false)
+      setPartiel({ confirmation: res, publication: false })
+    } catch (_) {
+      setPartiel({
+        erreur: 'Échec de la publication. Vérifie ta connexion et réessaie.',
+        publication: false,
+      })
     }
   }
 
-  /** Réinitialise le formulaire pour un nouveau menu. */
+  function majMenu(menu) {
+    setPartiel({ menu })
+  }
+
   function reset() {
-    setMenu(null)
-    setErreur(null)
-    setConfirmation(null)
+    setEtat(ETAT_INITIAL)
   }
 
   return {
-    // état
-    menu,
-    setMenu,
-    analyse,
-    publication,
-    confirmation,
-    erreur,
-    setErreur,
-    // actions
+    ...etat,
     analyser,
     publier,
+    majMenu,
     reset,
-    getMenuHistory,
   }
 }

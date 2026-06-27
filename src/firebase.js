@@ -1,22 +1,18 @@
 // ─────────────────────────────────────────────────────────────
-// Initialisation Firebase (Auth email/password + Firestore)
+// Initialisation Firebase — Auth + Firestore
 // ─────────────────────────────────────────────────────────────
+//
+// La persistance locale est configurée SYNCHRONEMENT via initializeAuth
+// (au lieu de setPersistence post-init) : la session survive à la fermeture
+// du navigateur et le gérant reste connecté entre les visites.
+//
+// Config Firebase : valeurs publiques par nature (intégrées au bundle JS).
+// La sécurité repose sur les règles Firestore + Firebase Auth, pas sur le
+// secret de ces identifiants. Voir firestore.rules.
 import { initializeApp } from 'firebase/app'
-import {
-  browserLocalPersistence,
-  getAuth,
-  setPersistence,
-} from 'firebase/auth'
+import { browserLocalPersistence, initializeAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
-// Configuration Firebase du projet "le-panda".
-//
-// ⚠️ Ces valeurs ne sont PAS des secrets : la config web Firebase est conçue
-// par Google pour être publique (elle est de toute façon embarquée dans le
-// bundle navigateur). La sécurité repose sur les règles Firestore + Firebase
-// Auth, pas sur le secret de ces identifiants. Il est donc sûr de les
-// committer. On laisse néanmoins la priorité aux variables d'environnement
-// VITE_* si elles sont définies (ex. sur Vercel).
 const firebaseConfig = {
   apiKey:
     import.meta.env.VITE_FIREBASE_API_KEY ||
@@ -32,29 +28,17 @@ const firebaseConfig = {
   appId:
     import.meta.env.VITE_FIREBASE_APP_ID ||
     '1:322625286794:web:d48e60a23a5fca03c5b373',
-  measurementId:
-    import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-NSE3JPMW0K',
 }
 
 const app = initializeApp(firebaseConfig)
 
-export const auth = getAuth(app)
-export const db = getFirestore(app)
-
-// Persistance LOCALE de la session : le gérant reste connecté même après
-// avoir fermé l'onglet ou le navigateur (le jeton est conservé dans le
-// stockage local de l'appareil, et rafraîchi automatiquement par Firebase).
-// Plus besoin de se reconnecter à chaque visite.
-//
-// Note : il n'est pas possible de « lier » la session à une adresse IP —
-// l'authentification Firebase repose sur un jeton stocké côté appareil, pas
-// sur l'IP. La persistance locale est l'équivalent fonctionnel attendu.
-setPersistence(auth, browserLocalPersistence).catch(() => {
-  // Si le stockage local est indisponible (navigation privée stricte), on
-  // retombe silencieusement sur la persistance par défaut.
+// initializeAuth avec persistence locale (synchrone, garanti avant tout signIn)
+export const auth = initializeAuth(app, {
+  persistence: browserLocalPersistence,
 })
 
-// Identifiant fixe du restaurant (collection restaurants/{id})
+export const db = getFirestore(app)
+
 export const RESTAURANT_ID =
   import.meta.env.VITE_PANDA_RESTAURANT_ID || 'panda_leytron'
 

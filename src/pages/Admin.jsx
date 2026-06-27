@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// Page /admin — layout sidebar + zone principale (protégée)
+// Page /admin — layout sidebar + zone principale
 // ─────────────────────────────────────────────────────────────
 import { useState } from 'react'
 import { AlertCircle } from 'lucide-react'
@@ -11,27 +11,12 @@ import HistoriqueList from '../components/HistoriqueList'
 import { useMenu } from '../hooks/useMenu'
 
 export default function Admin() {
-  const [onglet, setOnglet] = useState('semaine') // 'semaine' | 'historique'
-  const [texte, setTexte] = useState('')
+  const [onglet, setOnglet] = useState('semaine')
+  const [texte, setTexte]   = useState('')
 
-  const {
-    menu,
-    setMenu,
-    analyse,
-    publication,
-    confirmation,
-    erreur,
-    analyser,
-    publier,
-    reset,
-  } = useMenu()
+  const { menu, analyse, publication, confirmation, erreur, analyser, publier, majMenu, reset } =
+    useMenu()
 
-  // Lance l'analyse IA
-  async function handleAnalyser() {
-    await analyser(texte)
-  }
-
-  // Réinitialise le formulaire pour un nouveau menu
   function handleNouveau() {
     reset()
     setTexte('')
@@ -41,20 +26,23 @@ export default function Admin() {
     <div className="min-h-screen">
       <Sidebar ongletActif={onglet} setOngletActif={setOnglet} />
 
-      {/* Zone principale — décalée de la sidebar sur md+ */}
       <main className="md:ml-[240px]">
         <div className="mx-auto max-w-5xl px-4 py-8 pb-28 md:px-8 md:pb-12">
+
           {onglet === 'semaine' ? (
             <div className="flex flex-col gap-8">
-              {/* BLOC 1 — Input */}
-              <MenuInput
-                texte={texte}
-                setTexte={setTexte}
-                onAnalyser={handleAnalyser}
-                analyse={analyse}
-              />
 
-              {/* Message d'erreur global (analyse / publication) */}
+              {/* BLOC 1 — Saisie + analyse */}
+              {!confirmation && (
+                <MenuInput
+                  texte={texte}
+                  setTexte={setTexte}
+                  onAnalyser={() => analyser(texte)}
+                  analyse={analyse}
+                />
+              )}
+
+              {/* Erreur globale */}
               {erreur && (
                 <div className="flex justify-center">
                   <span className="badge-erreur">
@@ -64,29 +52,24 @@ export default function Admin() {
                 </div>
               )}
 
-              {/* BLOC 2 — Preview des fiches (après analyse) */}
+              {/* BLOC 2 — Fiches + publication */}
               {menu && !confirmation && (
                 <>
-                  <FichesGrid menu={menu} setMenu={setMenu} />
-                  <PublishBar
-                    onPublier={() => publier()}
-                    publication={publication}
-                    confirmation={null}
-                  />
+                  <FichesGrid menu={menu} setMenu={majMenu} />
+                  <PublishBar onPublier={() => publier()} publication={publication} />
                 </>
               )}
 
-              {/* BLOC 3 — Confirmation (après publication) */}
+              {/* BLOC 3 — Confirmation */}
               {confirmation && (
-                <PublishBar
-                  confirmation={confirmation}
-                  onNouveau={handleNouveau}
-                />
+                <PublishBar confirmation={confirmation} onNouveau={handleNouveau} />
               )}
+
             </div>
           ) : (
-            <HistoriqueList />
+            <HistoriqueList onRepublier={publier} />
           )}
+
         </div>
       </main>
     </div>

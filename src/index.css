@@ -5,32 +5,26 @@
 @tailwind utilities;
 
 /* ─────────────────────────────────────────────────────────────
-   Variables CSS globales — Identité visuelle Le Panda
+   Variables CSS — Identité visuelle Le Panda
    ───────────────────────────────────────────────────────────── */
 :root {
-  --noir: #1a1108; /* fond principal (très sombre brun-noir) */
-  --sombre: #120d06; /* fond des cartes et sections */
-  --or: #d4af57; /* couleur accent principale (dorée) */
-  --or-clair: #e8c97a; /* version claire de l'or pour hovers */
-  --rouge: #c0392b; /* couleur secondaire (rouge profond) */
-  --creme: #f5f0e8; /* texte principal clair */
-  --texte: #e8e0d0; /* texte secondaire */
-  --muted: #8a7060; /* texte tertiaire, placeholders */
-  --border: rgba(212, 175, 87, 0.12); /* bordures subtiles dorées */
-  --input-bg: #0f0b06; /* fond des champs de saisie */
+  --noir:    #1a1108;
+  --sombre:  #120d06;
+  --or:      #d4af57;
+  --or-clair: #e8c97a;
+  --rouge:   #c0392b;
+  --creme:   #f5f0e8;
+  --texte:   #e8e0d0;
+  --muted:   #8a7060;
+  --border:  rgba(212, 175, 87, 0.12);
+  --input-bg: #0f0b06;
 }
 
 /* ─────────────────────────────────────────────────────────────
    Base
    ───────────────────────────────────────────────────────────── */
 @layer base {
-  * {
-    @apply transition-colors duration-300 ease-in-out;
-  }
-
-  html,
-  body,
-  #root {
+  html, body, #root {
     height: 100%;
   }
 
@@ -38,22 +32,14 @@
     margin: 0;
     font-family: 'Inter', sans-serif;
     color: var(--texte);
-    /* Fond de page : --noir + radial-gradient subtil rouge en haut-gauche */
-    background: radial-gradient(
-        ellipse at top left,
-        rgba(192, 57, 43, 0.12),
-        transparent 60%
-      ),
+    background:
+      radial-gradient(ellipse at top left, rgba(192, 57, 43, 0.12), transparent 60%),
       var(--noir);
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
   }
 
-  h1,
-  h2,
-  h3,
-  h4 {
+  h1, h2, h3, h4 {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 400;
     color: var(--creme);
@@ -61,41 +47,38 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Composants UI réutilisables
+   Composants UI
+   (transitions ciblées — pas de `* { transition }` global)
    ───────────────────────────────────────────────────────────── */
 @layer components {
+
   /* Bouton primaire rouge */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3
-      text-xs font-semibold uppercase tracking-widest text-white
-      transition-all duration-300 ease-in-out;
+           text-xs font-semibold uppercase tracking-widest text-white
+           transition-transform duration-300 ease-in-out;
     background: var(--rouge);
     box-shadow: 0 12px 35px rgba(192, 57, 43, 0.4);
+    border: none;
+    cursor: pointer;
   }
-  .btn-primary:hover:not(:disabled) {
-    transform: scale(1.02);
-  }
-  .btn-primary:disabled {
-    @apply cursor-not-allowed opacity-60;
-    transform: none;
-  }
+  .btn-primary:hover:not(:disabled) { transform: scale(1.02); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
   /* Bouton secondaire (contour doré) */
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5
-      text-xs font-semibold uppercase tracking-widest
-      transition-all duration-300 ease-in-out;
+           text-xs font-semibold uppercase tracking-widest cursor-pointer;
     color: var(--or);
     background: transparent;
     border: 1px solid rgba(212, 175, 87, 0.3);
+    transition: border-color 0.2s ease, background 0.2s ease;
   }
   .btn-secondary:hover:not(:disabled) {
     border-color: rgba(212, 175, 87, 0.6);
     background: rgba(212, 175, 87, 0.08);
   }
-  .btn-secondary:disabled {
-    @apply cursor-not-allowed opacity-50;
-  }
+  .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* Cards / panels */
   .panel {
@@ -105,7 +88,7 @@
     padding: 28px;
   }
 
-  /* Inputs & textarea */
+  /* Champs de saisie */
   .field {
     @apply w-full;
     background: var(--input-bg);
@@ -115,36 +98,29 @@
     padding: 12px 16px;
     font-family: 'Inter', sans-serif;
     font-size: 0.95rem;
-    transition: border-color 0.3s ease-in-out;
-  }
-  .field::placeholder {
-    color: var(--muted);
-  }
-  .field:focus {
+    transition: border-color 0.2s ease;
     outline: none;
-    border-color: rgba(212, 175, 87, 0.6);
   }
+  .field::placeholder { color: var(--muted); }
+  .field:focus { border-color: rgba(212, 175, 87, 0.6); }
+  .field:disabled { opacity: 0.6; cursor: not-allowed; }
 
-  /* Label de champ */
+  /* Labels */
   .field-label {
     @apply mb-2 block text-xs font-medium uppercase tracking-wider;
     color: var(--muted);
     font-family: 'Inter', sans-serif;
   }
 
-  /* Ligne décorative (gradient rouge → or → or-clair) */
+  /* Ligne décorative rouge → or */
   .ligne-deco {
     height: 2px;
     width: 100%;
-    background: linear-gradient(
-      90deg,
-      var(--rouge),
-      var(--or),
-      var(--or-clair)
-    );
+    background: linear-gradient(90deg, var(--rouge), var(--or), var(--or-clair));
+    border-radius: 1px;
   }
 
-  /* Badges de statut */
+  /* Badges */
   .badge-erreur {
     @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium;
     background: rgba(192, 57, 43, 0.15);
@@ -166,6 +142,16 @@
     border: 1px solid rgba(212, 175, 87, 0.2);
     padding: 2px 10px;
   }
+
+  /* Card de plat (hover via CSS, pas JS) */
+  .fiche-card {
+    background: var(--sombre);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+  .fiche-card:hover { border-color: rgba(212, 175, 87, 0.3); }
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -175,27 +161,15 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(212, 175, 87, 0.4) var(--noir);
 }
-*::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-*::-webkit-scrollbar-track {
-  background: var(--noir);
-}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: var(--noir); }
 *::-webkit-scrollbar-thumb {
   background: rgba(212, 175, 87, 0.4);
   border-radius: 9999px;
+  transition: background 0.2s ease;
 }
-*::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 175, 87, 0.6);
-}
+*::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 87, 0.65); }
 
-/* Animation spinner */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-.animate-spin-slow {
-  animation: spin 0.9s linear infinite;
-}
+/* Spinner */
+@keyframes spin { to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin 0.85s linear infinite; }
