@@ -1,0 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────
+   Variables CSS globales — Identité visuelle Le Panda
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --noir: #1a1108; /* fond principal (très sombre brun-noir) */
+  --sombre: #120d06; /* fond des cartes et sections */
+  --or: #d4af57; /* couleur accent principale (dorée) */
+  --or-clair: #e8c97a; /* version claire de l'or pour hovers */
+  --rouge: #c0392b; /* couleur secondaire (rouge profond) */
+  --creme: #f5f0e8; /* texte principal clair */
+  --texte: #e8e0d0; /* texte secondaire */
+  --muted: #8a7060; /* texte tertiaire, placeholders */
+  --border: rgba(212, 175, 87, 0.12); /* bordures subtiles dorées */
+  --input-bg: #0f0b06; /* fond des champs de saisie */
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Base
+   ───────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply transition-colors duration-300 ease-in-out;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    color: var(--texte);
+    /* Fond de page : --noir + radial-gradient subtil rouge en haut-gauche */
+    background: radial-gradient(
+        ellipse at top left,
+        rgba(192, 57, 43, 0.12),
+        transparent 60%
+      ),
+      var(--noir);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    color: var(--creme);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Composants UI réutilisables
+   ───────────────────────────────────────────────────────────── */
+@layer components {
+  /* Bouton primaire rouge */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3
+      text-xs font-semibold uppercase tracking-widest text-white
+      transition-all duration-300 ease-in-out;
+    background: var(--rouge);
+    box-shadow: 0 12px 35px rgba(192, 57, 43, 0.4);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: scale(1.02);
+  }
+  .btn-primary:disabled {
+    @apply cursor-not-allowed opacity-60;
+    transform: none;
+  }
+
+  /* Bouton secondaire (contour doré) */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5
+      text-xs font-semibold uppercase tracking-widest
+      transition-all duration-300 ease-in-out;
+    color: var(--or);
+    background: transparent;
+    border: 1px solid rgba(212, 175, 87, 0.3);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    border-color: rgba(212, 175, 87, 0.6);
+    background: rgba(212, 175, 87, 0.08);
+  }
+  .btn-secondary:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+
+  /* Cards / panels */
+  .panel {
+    background: var(--sombre);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+
+  /* Inputs & textarea */
+  .field {
+    @apply w-full;
+    background: var(--input-bg);
+    border: 1px solid rgba(212, 175, 87, 0.2);
+    color: var(--creme);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease-in-out;
+  }
+  .field::placeholder {
+    color: var(--muted);
+  }
+  .field:focus {
+    outline: none;
+    border-color: rgba(212, 175, 87, 0.6);
+  }
+
+  /* Label de champ */
+  .field-label {
+    @apply mb-2 block text-xs font-medium uppercase tracking-wider;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Ligne décorative (gradient rouge → or → or-clair) */
+  .ligne-deco {
+    height: 2px;
+    width: 100%;
+    background: linear-gradient(
+      90deg,
+      var(--rouge),
+      var(--or),
+      var(--or-clair)
+    );
+  }
+
+  /* Badges de statut */
+  .badge-erreur {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium;
+    background: rgba(192, 57, 43, 0.15);
+    color: var(--rouge);
+    border: 1px solid rgba(192, 57, 43, 0.3);
+  }
+  .badge-succes {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium;
+    background: rgba(212, 175, 87, 0.15);
+    color: var(--or);
+    border: 1px solid rgba(212, 175, 87, 0.3);
+  }
+
+  /* Pill jour */
+  .pill-jour {
+    @apply inline-block rounded-full text-xs;
+    background: rgba(212, 175, 87, 0.1);
+    color: var(--or);
+    border: 1px solid rgba(212, 175, 87, 0.2);
+    padding: 2px 10px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Scrollbar custom
+   ───────────────────────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 87, 0.4) var(--noir);
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--noir);
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 87, 0.4);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 87, 0.6);
+}
+
+/* Animation spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin 0.9s linear infinite;
+}
