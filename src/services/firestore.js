@@ -21,6 +21,7 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  updateDoc,
 } from 'firebase/firestore'
 import { db, RESTAURANT_ID } from '../firebase'
 
@@ -99,4 +100,32 @@ export async function getMenuHistory(max = 10) {
   )
   const snap = await getDocs(q)
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+}
+
+// ─── Réservations ─────────────────────────────────────────────
+
+function refReservations() {
+  return collection(db, 'restaurants', RESTAURANT_ID, 'reservations')
+}
+
+/**
+ * Récupère les réservations triées par date de création décroissante.
+ * @param {number} max
+ */
+export async function getReservations(max = 100) {
+  const q = query(refReservations(), orderBy('cree_le', 'desc'), limit(max))
+  const snap = await getDocs(q)
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+}
+
+/**
+ * Met à jour le statut d'une réservation.
+ * @param {string} id
+ * @param {'en_attente'|'confirme'|'refuse'} statut
+ */
+export async function updateStatutReservation(id, statut) {
+  await updateDoc(doc(db, 'restaurants', RESTAURANT_ID, 'reservations', id), {
+    statut,
+    traite_le: serverTimestamp(),
+  })
 }

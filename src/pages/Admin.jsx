@@ -10,6 +10,7 @@ import PublishBar from '../components/PublishBar'
 import HistoriqueList from '../components/HistoriqueList'
 import ContactForm from '../components/ContactForm'
 import PlanificationCalendar from '../components/PlanificationCalendar'
+import ReservationsPage from '../components/ReservationsPage'
 import { useMenu } from '../hooks/useMenu'
 import { usePlanification } from '../hooks/usePlanification'
 
@@ -88,6 +89,8 @@ export default function Admin() {
               onDupliquer={dupliquerVersAutreSemaine}
               onSupprimer={supprimerPlanification}
             />
+          ) : onglet === 'reservations' ? (
+            <ReservationsPage />
           ) : onglet === 'historique' ? (
             <HistoriqueList onRepublier={publier} />
           ) : (

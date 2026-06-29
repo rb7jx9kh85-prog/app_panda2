@@ -35,6 +35,15 @@ service cloud.firestore {
       match /menus_planifies/{planId} {
         allow read, write: if request.auth != null;
       }
+
+      // Réservations : le public peut créer (formulaire site vitrine),
+      // seul l'admin connecté peut lire et modifier le statut.
+      match /reservations/{reservationId} {
+        allow create: if request.resource.data.keys().hasAll([
+          'nom', 'telephone', 'date', 'heure', 'nb_personnes', 'statut', 'cree_le'
+        ]);
+        allow read, update, delete: if request.auth != null;
+      }
     }
   }
 }
