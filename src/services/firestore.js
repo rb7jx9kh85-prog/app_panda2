@@ -150,20 +150,27 @@ export async function getClosedDates() {
 
 /**
  * Ajoute un jour fermé.
+ * setDoc + merge : crée le document `closed_dates/config` s'il n'existe pas
+ * encore (updateDoc échouerait avec « No document to update »).
  * @param {string} isoDate format YYYY-MM-DD
  */
 export async function addClosedDate(isoDate) {
-  await updateDoc(refClosedDates(), {
-    dates: arrayUnion(isoDate),
-  })
+  await setDoc(
+    refClosedDates(),
+    { dates: arrayUnion(isoDate) },
+    { merge: true }
+  )
 }
 
 /**
  * Supprime un jour fermé.
+ * setDoc + merge pour rester robuste même si le document n'existe pas encore.
  * @param {string} isoDate format YYYY-MM-DD
  */
 export async function removeClosedDate(isoDate) {
-  await updateDoc(refClosedDates(), {
-    dates: arrayRemove(isoDate),
-  })
+  await setDoc(
+    refClosedDates(),
+    { dates: arrayRemove(isoDate) },
+    { merge: true }
+  )
 }
