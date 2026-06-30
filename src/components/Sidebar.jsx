@@ -96,44 +96,57 @@ export default function Sidebar({ ongletActif, setOngletActif }) {
         </div>
       </aside>
 
-      {/* ───────── Mobile : barre Liquid Glass + actions secondaires ───────── */}
-      {/* Pills flottantes (Demandes, Paramètres, Quitter) au-dessus de la barre */}
+      {/* ───────── Mobile : actions secondaires (barre verre groupée) ───────── */}
       <div
-        className="fixed inset-x-0 z-30 flex justify-center gap-2 px-4 md:hidden"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 96px)' }}
+        className="fixed inset-x-0 z-30 flex justify-center md:hidden"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 86px)', pointerEvents: 'none' }}
       >
-        {NAV_EXTRA.map(({ id, label, Icone }) => {
-          const actif = ongletActif === id
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setOngletActif(id)}
-              className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md transition-all active:scale-95"
-              style={{
-                color: actif ? '#fff' : 'rgba(255,255,255,0.75)',
-                background: actif ? 'var(--or)' : 'rgba(255,255,255,0.08)',
-                border: `1px solid ${actif ? 'var(--or)' : 'rgba(255,255,255,0.14)'}`,
-              }}
-            >
-              <Icone size={14} />
-              {label}
-            </button>
-          )
-        })}
-        <button
-          type="button"
-          onClick={handleDeconnexion}
-          className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md transition-all active:scale-95"
+        <div
+          className="flex items-center"
           style={{
-            color: '#ff6b6b',
-            background: 'rgba(255,107,107,0.1)',
-            border: '1px solid rgba(255,107,107,0.22)',
+            pointerEvents: 'auto',
+            borderRadius: '999px',
+            padding: '4px',
+            background: 'rgba(28,28,32,0.5)',
+            backdropFilter: 'blur(22px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(22px) saturate(180%)',
+            border: '1px solid rgba(255,255,255,0.09)',
+            boxShadow: '0 6px 22px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10)',
           }}
         >
-          <LogOut size={14} />
-          Quitter
-        </button>
+          {NAV_EXTRA.map(({ id, label, Icone }) => {
+            const actif = ongletActif === id
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setOngletActif(id)}
+                className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 transition-all active:scale-95"
+                style={{
+                  fontSize: '12.5px',
+                  fontWeight: 500,
+                  color: actif ? '#e8c97a' : 'rgba(245,240,232,0.6)',
+                  background: actif ? 'rgba(255,255,255,0.12)' : 'transparent',
+                }}
+              >
+                <Icone size={14} />
+                {label}
+              </button>
+            )
+          })}
+
+          <span style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.12)', margin: '0 3px' }} />
+
+          <button
+            type="button"
+            onClick={handleDeconnexion}
+            className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 transition-all active:scale-95"
+            style={{ fontSize: '12.5px', fontWeight: 500, color: 'rgba(255,118,108,0.9)' }}
+          >
+            <LogOut size={14} />
+            Quitter
+          </button>
+        </div>
       </div>
 
       <LiquidGlassNav ongletActif={ongletActif} setOngletActif={setOngletActif} />

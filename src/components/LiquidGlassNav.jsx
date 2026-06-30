@@ -1,23 +1,23 @@
 // ─────────────────────────────────────────────────────────────
-// LiquidGlassNav — barre de navigation mobile "Liquid Glass" (iOS-like)
-// Bulle de sélection animée + reflet (shine). Effet verre via .liquid-glass
+// LiquidGlassNav — barre de navigation mobile (style iOS « liquid glass »)
+// Verre sombre neutre + bulle de sélection raffinée (accent doré marque)
 // ─────────────────────────────────────────────────────────────
 import { Calendar, CalendarDays, ClipboardList, BookOpen } from 'lucide-react'
 
 const NAV_PRINCIPAL = [
-  { id: 'semaine',       label: 'Menu',          Icone: CalendarDays  },
-  { id: 'planification', label: 'Planif',        Icone: Calendar      },
-  { id: 'reservations',  label: 'Résa',          Icone: BookOpen      },
-  { id: 'historique',    label: 'Historique',    Icone: ClipboardList },
+  { id: 'semaine',       label: 'Menu',       Icone: CalendarDays  },
+  { id: 'planification', label: 'Planif',     Icone: Calendar      },
+  { id: 'reservations',  label: 'Résa',       Icone: BookOpen      },
+  { id: 'historique',    label: 'Historique', Icone: ClipboardList },
 ]
 
 export default function LiquidGlassNav({ ongletActif, setOngletActif }) {
   const total = NAV_PRINCIPAL.length
   const activeIndex = Math.max(0, NAV_PRINCIPAL.findIndex((n) => n.id === ongletActif))
 
-  // Largeur d'une cellule = (100% - padding gauche/droite) / nb d'items
-  const cellWidth = `calc((100% - 16px) / ${total})`
-  const selectorLeft = `calc(8px + ${activeIndex} * ((100% - 16px) / ${total}))`
+  // Cellule = (largeur - padding) / nb d'items ; la bulle glisse dessus
+  const cellWidth = `calc((100% - 12px) / ${total})`
+  const selectorLeft = `calc(6px + ${activeIndex} * ((100% - 12px) / ${total}))`
 
   return (
     <nav
@@ -25,37 +25,38 @@ export default function LiquidGlassNav({ ongletActif, setOngletActif }) {
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 14px)', pointerEvents: 'none' }}
     >
       <div
-        className="liquid-glass relative flex"
+        className="relative flex"
         style={{
           pointerEvents: 'auto',
-          width: 'min(430px, calc(100vw - 24px))',
-          height: '74px',
-          padding: '8px',
+          width: 'min(420px, calc(100vw - 28px))',
+          height: '64px',
+          padding: '6px',
           borderRadius: '999px',
+          background: 'rgba(28,28,32,0.55)',
+          backdropFilter: 'blur(28px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+          border: '1px solid rgba(255,255,255,0.10)',
+          boxShadow: '0 10px 34px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.14)',
         }}
       >
-        {/* Reflet animé */}
-        <span className="shine" />
-
-        {/* Bulle de sélection */}
+        {/* Bulle de sélection (glisse en douceur) */}
         <div
           aria-hidden
           style={{
             position: 'absolute',
-            top: '8px',
+            top: '6px',
             left: selectorLeft,
             width: cellWidth,
-            height: 'calc(100% - 16px)',
+            height: 'calc(100% - 12px)',
             borderRadius: '999px',
-            background: 'rgba(255,255,255,0.14)',
-            boxShadow:
-              '0 10px 25px rgba(0,0,0,0.25), inset 0 1px rgba(255,255,255,0.4), inset 0 -1px rgba(255,255,255,0.08)',
-            transition: 'left 0.45s cubic-bezier(0.22,0.9,0.2,1)',
+            background: 'rgba(255,255,255,0.13)',
+            border: '1px solid rgba(232,201,122,0.22)',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.22)',
+            transition: 'left 0.42s cubic-bezier(0.34, 1.32, 0.5, 1)',
             pointerEvents: 'none',
           }}
         />
 
-        {/* Boutons */}
         {NAV_PRINCIPAL.map(({ id, label, Icone }) => {
           const actif = ongletActif === id
           return (
@@ -63,15 +64,21 @@ export default function LiquidGlassNav({ ongletActif, setOngletActif }) {
               key={id}
               type="button"
               onClick={() => setOngletActif(id)}
-              className="relative flex flex-1 flex-col items-center justify-center gap-1"
+              className="relative flex flex-1 flex-col items-center justify-center"
               style={{
                 zIndex: 5,
-                color: actif ? '#0A84FF' : 'rgba(255,255,255,0.7)',
-                transition: 'color 0.35s ease',
+                gap: '3px',
+                color: actif ? '#e8c97a' : 'rgba(245,240,232,0.5)',
+                transition: 'color 0.3s ease',
               }}
             >
-              <Icone size={22} strokeWidth={actif ? 2.4 : 1.9} />
-              <span className="text-[10px] font-semibold tracking-wide">{label}</span>
+              <Icone size={21} strokeWidth={actif ? 2.3 : 1.8} />
+              <span
+                className="font-medium"
+                style={{ fontSize: '10px', letterSpacing: '0.02em', whiteSpace: 'nowrap' }}
+              >
+                {label}
+              </span>
             </button>
           )
         })}
