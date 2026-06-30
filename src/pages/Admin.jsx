@@ -1,5 +1,6 @@
 // ─────────────────────────────────────────────────────────────
 // Page /admin — layout sidebar + zone principale
+// Latest: Sidebar mobile nav + PlanificationCalendar improvements + Settings/Reservations
 // ─────────────────────────────────────────────────────────────
 import { useState } from 'react'
 import { AlertCircle } from 'lucide-react'
