@@ -43,7 +43,7 @@ export default function Admin() {
       <Sidebar ongletActif={onglet} setOngletActif={setOnglet} />
 
       <main className="md:ml-[240px]">
-        <div key={onglet} className="anim-fade mx-auto max-w-5xl px-4 py-8 pb-28 md:px-8 md:pb-12">
+        <div key={onglet} className="anim-fade mx-auto max-w-5xl px-4 py-8 pb-44 md:px-8 md:pb-12">
 
           {onglet === 'semaine' ? (
             <div className="flex flex-col gap-8">

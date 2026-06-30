@@ -1,10 +1,10 @@
 // ─────────────────────────────────────────────────────────────
-// Sidebar — navigation (desktop/tablet) + bottom tab bar (mobile)
+// Sidebar — navigation (desktop/tablet) + Liquid Glass nav (mobile)
 // ─────────────────────────────────────────────────────────────
-import { Calendar, CalendarDays, ClipboardList, Mail, LogOut, BookOpen, Settings, MoreVertical } from 'lucide-react'
-import { useState } from 'react'
+import { Calendar, CalendarDays, ClipboardList, Mail, LogOut, BookOpen, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import LiquidGlassNav from './LiquidGlassNav'
 
 const NAV_PRINCIPAL = [
   { id: 'semaine',       label: 'Menu semaine',  Icone: CalendarDays  },
@@ -23,7 +23,6 @@ const NAV = [...NAV_PRINCIPAL, ...NAV_EXTRA]
 export default function Sidebar({ ongletActif, setOngletActif }) {
   const { seDeconnecter } = useAuth()
   const navigate = useNavigate()
-  const [showMenu, setShowMenu] = useState(false)
 
   async function handleDeconnexion() {
     await seDeconnecter()
@@ -97,88 +96,47 @@ export default function Sidebar({ ongletActif, setOngletActif }) {
         </div>
       </aside>
 
-      {/* ───────── Mobile : bottom tab bar ───────── */}
-      <nav
-        className="fixed bottom-0 left-0 z-30 flex w-full items-stretch justify-around md:hidden"
-        style={{
-          background: 'var(--sombre)',
-          borderTop: '1px solid var(--border)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-        }}
+      {/* ───────── Mobile : barre Liquid Glass + actions secondaires ───────── */}
+      {/* Pills flottantes (Demandes, Paramètres, Quitter) au-dessus de la barre */}
+      <div
+        className="fixed inset-x-0 z-30 flex justify-center gap-2 px-4 md:hidden"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 96px)' }}
       >
-        {NAV_PRINCIPAL.map(({ id, label, Icone }) => {
+        {NAV_EXTRA.map(({ id, label, Icone }) => {
           const actif = ongletActif === id
           return (
             <button
               key={id}
               type="button"
-              onClick={() => {
-                setOngletActif(id)
-                setShowMenu(false)
+              onClick={() => setOngletActif(id)}
+              className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md transition-all active:scale-95"
+              style={{
+                color: actif ? '#fff' : 'rgba(255,255,255,0.75)',
+                background: actif ? 'var(--or)' : 'rgba(255,255,255,0.08)',
+                border: `1px solid ${actif ? 'var(--or)' : 'rgba(255,255,255,0.14)'}`,
               }}
-              className="flex flex-1 flex-col items-center gap-1 py-3 transition-colors"
-              style={{ color: actif ? 'var(--or)' : 'var(--muted)' }}
             >
-              <Icone size={20} />
-              <span className="text-[0.6rem] uppercase tracking-wider">{label}</span>
+              <Icone size={14} />
+              {label}
             </button>
           )
         })}
-
-        {/* Menu "Plus" pour options supplémentaires */}
-        <div className="relative flex flex-1 flex-col items-center">
-          <button
-            type="button"
-            onClick={() => setShowMenu(!showMenu)}
-            className="flex flex-1 flex-col items-center justify-center gap-1 py-3 transition-colors"
-            style={{ color: showMenu ? 'var(--or)' : 'var(--muted)' }}
-          >
-            <MoreVertical size={20} />
-            <span className="text-[0.6rem] uppercase tracking-wider">Plus</span>
-          </button>
-
-          {/* Menu déroulant */}
-          {showMenu && (
-            <div
-              className="absolute bottom-full left-0 right-0 mb-2 rounded-lg overflow-hidden shadow-lg"
-              style={{ background: 'var(--sombre)', border: '1px solid var(--border)' }}
-            >
-              {NAV_EXTRA.map(({ id, label, Icone }) => {
-                const actif = ongletActif === id
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => {
-                      setOngletActif(id)
-                      setShowMenu(false)
-                    }}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-colors"
-                    style={{
-                      color: actif ? 'var(--or)' : 'var(--texte)',
-                      background: actif ? 'rgba(212,175,87,0.1)' : 'transparent',
-                      borderBottom: '1px solid var(--border)',
-                    }}
-                  >
-                    <Icone size={16} />
-                    {label}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
         <button
           type="button"
           onClick={handleDeconnexion}
-          className="flex flex-1 flex-col items-center gap-1 py-3 transition-colors"
-          style={{ color: 'var(--muted)' }}
+          className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md transition-all active:scale-95"
+          style={{
+            color: '#ff6b6b',
+            background: 'rgba(255,107,107,0.1)',
+            border: '1px solid rgba(255,107,107,0.22)',
+          }}
         >
-          <LogOut size={20} />
-          <span className="text-[0.6rem] uppercase tracking-wider">Quitter</span>
+          <LogOut size={14} />
+          Quitter
         </button>
-      </nav>
+      </div>
+
+      <LiquidGlassNav ongletActif={ongletActif} setOngletActif={setOngletActif} />
     </>
   )
 }
