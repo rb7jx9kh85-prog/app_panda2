@@ -16,12 +16,15 @@ import {
   collection,
   doc,
   getDocs,
+  getDoc,
   limit,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  arrayUnion,
+  arrayRemove,
 } from 'firebase/firestore'
 import { db, RESTAURANT_ID } from '../firebase'
 
@@ -127,5 +130,40 @@ export async function updateStatutReservation(id, statut) {
   await updateDoc(doc(db, 'restaurants', RESTAURANT_ID, 'reservations', id), {
     statut,
     traite_le: serverTimestamp(),
+  })
+}
+
+// ─── Jours fermés ─────────────────────────────────────────────
+
+function refClosedDates() {
+  return doc(db, 'restaurants', RESTAURANT_ID, 'closed_dates', 'config')
+}
+
+/**
+ * Récupère la liste des jours fermés (format ISO YYYY-MM-DD).
+ * @returns {Promise<string[]>}
+ */
+export async function getClosedDates() {
+  const snap = await getDoc(refClosedDates())
+  return snap.exists() ? snap.data().dates || [] : []
+}
+
+/**
+ * Ajoute un jour fermé.
+ * @param {string} isoDate format YYYY-MM-DD
+ */
+export async function addClosedDate(isoDate) {
+  await updateDoc(refClosedDates(), {
+    dates: arrayUnion(isoDate),
+  })
+}
+
+/**
+ * Supprime un jour fermé.
+ * @param {string} isoDate format YYYY-MM-DD
+ */
+export async function removeClosedDate(isoDate) {
+  await updateDoc(refClosedDates(), {
+    dates: arrayRemove(isoDate),
   })
 }

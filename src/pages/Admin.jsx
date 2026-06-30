@@ -11,6 +11,7 @@ import HistoriqueList from '../components/HistoriqueList'
 import ContactForm from '../components/ContactForm'
 import PlanificationCalendar from '../components/PlanificationCalendar'
 import ReservationsPage from '../components/ReservationsPage'
+import SettingsPage from '../components/SettingsPage'
 import { useMenu } from '../hooks/useMenu'
 import { usePlanification } from '../hooks/usePlanification'
 
@@ -91,6 +92,8 @@ export default function Admin() {
             />
           ) : onglet === 'reservations' ? (
             <ReservationsPage />
+          ) : onglet === 'parametres' ? (
+            <SettingsPage />
           ) : onglet === 'historique' ? (
             <HistoriqueList onRepublier={publier} />
           ) : (

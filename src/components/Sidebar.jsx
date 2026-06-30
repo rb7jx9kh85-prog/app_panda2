@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────
 // Sidebar — navigation (desktop/tablet) + bottom tab bar (mobile)
 // ─────────────────────────────────────────────────────────────
-import { Calendar, CalendarDays, ClipboardList, Mail, LogOut, BookOpen } from 'lucide-react'
+import { Calendar, CalendarDays, ClipboardList, Mail, LogOut, BookOpen, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
@@ -11,6 +11,7 @@ const NAV = [
   { id: 'reservations',  label: 'Réservations',  Icone: BookOpen      },
   { id: 'historique',    label: 'Historique',    Icone: ClipboardList },
   { id: 'contact',       label: 'Demandes',      Icone: Mail          },
+  { id: 'parametres',    label: 'Paramètres',    Icone: Settings      },
 ]
 
 export default function Sidebar({ ongletActif, setOngletActif }) {
