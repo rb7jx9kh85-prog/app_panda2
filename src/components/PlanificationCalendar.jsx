@@ -129,7 +129,7 @@ export default function PlanificationCalendar({
       </div>
 
       {/* Grille de semaines */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {semaines.map((semaine, i) => {
           const plan = planPour(semaine)
           const [, num] = semaine.split('-W')
@@ -138,46 +138,47 @@ export default function PlanificationCalendar({
           return (
             <div
               key={semaine}
-              className="carte-semaine anim-entree rounded-xl border p-4"
+              className="carte-semaine anim-entree rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
               style={{
                 animationDelay: `${i * 55}ms`,
-                borderColor: enEdition ? 'var(--or)' : 'var(--border)',
-                background: plan ? 'rgba(212,175,87,0.04)' : 'transparent',
+                borderColor: enEdition ? 'var(--or)' : plan ? 'rgba(212,175,87,0.3)' : 'var(--border)',
+                background: plan ? 'linear-gradient(135deg, rgba(212,175,87,0.08) 0%, rgba(212,175,87,0.02) 100%)' : 'rgba(255,255,255,0.02)',
                 borderWidth: enEdition ? '2px' : '1px',
+                padding: '1.5rem',
               }}
             >
               {/* Entête carte */}
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-medium" style={{ color: 'var(--creme)' }}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <p className="font-semibold text-lg" style={{ color: 'var(--or)' }}>
                     Semaine {num}
                   </p>
-                  <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                  <p className="text-xs mt-1 font-medium" style={{ color: 'var(--muted)' }}>
                     {semaine}
                   </p>
                 </div>
 
                 {!enEdition && (
-                  <div className="flex gap-1">
+                  <div className="flex gap-1.5 flex-shrink-0">
                     <button
                       type="button"
                       onClick={() => ouvrirEdition(semaine, plan)}
-                      className="rounded p-1.5 transition-colors hover:bg-[rgba(212,175,87,0.12)]"
+                      className="rounded-lg p-2 transition-all hover:bg-[rgba(212,175,87,0.15)] active:scale-95"
                       style={{ color: 'var(--or)' }}
                       title={plan ? 'Modifier la note' : 'Ajouter une planification'}
                     >
-                      {plan ? <Pencil size={15} /> : <Plus size={16} />}
+                      {plan ? <Pencil size={18} /> : <Plus size={18} />}
                     </button>
                     {plan && (
                       <>
                         <button
                           type="button"
                           onClick={() => handleDupliquer(semaine)}
-                          className="rounded p-1.5 transition-colors hover:bg-[rgba(212,175,87,0.12)]"
+                          className="rounded-lg p-2 transition-all hover:bg-[rgba(212,175,87,0.15)] active:scale-95"
                           style={{ color: 'var(--or)' }}
                           title="Dupliquer vers une autre semaine"
                         >
-                          <Copy size={15} />
+                          <Copy size={18} />
                         </button>
                         <button
                           type="button"
@@ -186,11 +187,11 @@ export default function PlanificationCalendar({
                               onSupprimer?.(plan.id)
                             }
                           }}
-                          className="rounded p-1.5 transition-colors hover:bg-[rgba(192,57,43,0.12)]"
+                          className="rounded-lg p-2 transition-all hover:bg-[rgba(192,57,43,0.15)] active:scale-95"
                           style={{ color: 'var(--rouge)' }}
                           title="Supprimer"
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={18} />
                         </button>
                       </>
                     )}
@@ -237,16 +238,16 @@ export default function PlanificationCalendar({
                   </div>
                 </div>
               ) : plan ? (
-                <div className="mt-4">
-                  <div className="mb-2 flex items-center gap-2">
+                <div className="mt-5 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
                     <span
-                      className="rounded px-2 py-1 text-xs font-medium"
-                      style={{ background: 'rgba(192,57,43,0.12)', color: 'var(--rouge)' }}
+                      className="rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide"
+                      style={{ background: 'rgba(192,57,43,0.15)', color: 'var(--rouge)' }}
                     >
-                      Brouillon
+                      📝 Brouillon
                     </span>
                     <span className="text-xs" style={{ color: 'var(--muted)' }}>
-                      Modifié le {new Date(plan.updatedAt).toLocaleDateString('fr-FR')}
+                      Modifié {new Date(plan.updatedAt).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' })}
                     </span>
                   </div>
                   {plan.notes ? (
@@ -255,7 +256,7 @@ export default function PlanificationCalendar({
                     </p>
                   ) : (
                     <p className="text-xs italic" style={{ color: 'var(--muted)' }}>
-                      Aucune note — cliquez sur le crayon pour en ajouter.
+                      Aucune note — modifiez pour en ajouter une.
                     </p>
                   )}
                 </div>
@@ -263,10 +264,10 @@ export default function PlanificationCalendar({
                 <button
                   type="button"
                   onClick={() => ouvrirEdition(semaine, null)}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed py-3 text-xs transition-colors hover:bg-[rgba(212,175,87,0.06)]"
-                  style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
+                  className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-xl border border-dashed py-4 text-sm font-medium transition-all hover:bg-[rgba(212,175,87,0.1)] active:scale-95"
+                  style={{ borderColor: 'rgba(212,175,87,0.4)', color: 'var(--or)' }}
                 >
-                  <Plus size={14} />
+                  <Plus size={18} />
                   Planifier cette semaine
                 </button>
               )}
